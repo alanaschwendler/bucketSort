@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <omp.h>
-#include <pthread.h>
 
 #define n_thread 8
 
