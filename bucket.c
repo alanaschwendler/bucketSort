@@ -81,7 +81,6 @@ void bucketSort(int *v, int size) {
 	assert(b);
 	
 	int i, j, idx;
-	#pragma omp parallel for schedule(guided)
 	for(i = 0; i < size; ++i) {
 		idx = v[i] % n_thread; //calculates the index of the value in the new vector		
 		(b[idx].num) += 1;
@@ -89,7 +88,6 @@ void bucketSort(int *v, int size) {
 		b[idx].bucket[(b[idx].num)-1] = v[i];
 	}
 	
-	#pragma omp parallel for schedule(guided) num_threads(n_thread)
 	for(i = 0; i < n_thread; ++i) { //sort each bucket
 		if(b[i].num != 0)
 			sort(b[i].bucket, b[i].num);
