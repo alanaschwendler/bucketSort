@@ -146,6 +146,7 @@ void sort(int *v, int size) {
 		v[j+1] = tmp;
 	}
 }
+
 /*
  * Sorting function for pthreads
  */ 

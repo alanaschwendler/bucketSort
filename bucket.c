@@ -10,10 +10,16 @@
 #define tam2 10000
 #define tam3 20000
 #define bucket_size (tam3 / n_thread) * 2
-typedef struct b {
+
+typedef struct bucket {
 	int num;
 	int bucket[bucket_size]; 
 } Bucket_t;
+
+typedef struct args {
+	int *arr;
+	int sz;
+} Args_t;
 
 /*
  * Fills the vector according to the size
@@ -42,19 +48,23 @@ void printVec(int *v, int size);
 void sort(int *v, int size);
 //void bubble(int *v, int size);
 
-int main(){
-	
+void *sort_threads(void *params);
+
+int main() {
+	/*
 	int *vet1 = malloc(sizeof(int)* tam1);
 	fill(vet1, tam1);
+	//printVec(vet1, tam1);
 	bucketSort(vet1, tam1);
+	//printVec(vet1, tam1);
 	free(vet1);
-	
-	/*		
+	*/
+		
 	int *vet2 = malloc(sizeof(int)* tam2);
 	fill(vet2, tam2);
 	bucketSort(vet2, tam2);
 	free(vet2);
-	*/
+	
 	/*
 	int *vet3 = malloc(sizeof(int)* tam3);
 	fill(vet3, tam3);
@@ -79,8 +89,15 @@ void fill(int *v, int size) {
 void bucketSort(int *v, int size) {
 	Bucket_t *b = calloc(sizeof(Bucket_t), n_thread); //creates a vector of buckets, initializing with 0
 	assert(b);
-	
-	int i, j, idx;
+
+	pthread_t thr[n_thread];
+	Args_t *args = malloc(sizeof(Args_t));
+	assert(args);
+
+	args->arr = v; 
+	args->sz = size;
+
+	int i, j, idx, res;
 	for(i = 0; i < size; ++i) {
 		idx = v[i] % n_thread; //calculates the index of the value in the new vector		
 		(b[idx].num) += 1;
@@ -90,7 +107,8 @@ void bucketSort(int *v, int size) {
 	
 	for(i = 0; i < n_thread; ++i) { //sort each bucket
 		if(b[i].num != 0)
-			sort(b[i].bucket, b[i].num);
+			res = pthread_create(&thr[i], NULL, sort_threads, (void *)args);
+			//sort(b[i].bucket, b[i].num);
 	}
 	
 	idx = 0;
@@ -98,6 +116,7 @@ void bucketSort(int *v, int size) {
 		for(j = 0; j < b[i].num; ++j)
 			v[idx++] = b[i].bucket[j];
 	free(b);
+	free(args);
 }
 
 /*
@@ -115,7 +134,7 @@ void printVec(int *v, int size) {
  */
 void sort(int *v, int size) {
 	int i, j, tmp;
-	
+
 	for(i = 1; i < size; ++i) { //i starts in 1 
 		tmp = v[i]; //tmp is the current value
 		for(j = i - 1; (j >= 0) && (tmp < v[j]); --j) { //j starts one before i, j is between 0 and current
@@ -124,12 +143,17 @@ void sort(int *v, int size) {
 		v[j+1] = tmp;
 	}
 }
+
+void *sort_threads(void *params) {
+	sort(((Args_t *)params)->arr, ((Args_t *)params)->sz);
+}
 /*
-void bubble(int *v, int size){
+void bubble(int *v, int size) {
 	char changed = 'n';
+    int i;
 	while (changed == 'n'){
 		changed = 'n';
-		for (int i=0 ; i<size-1 ; ++i){
+		for (i = 0; i < size-1; ++i){
 			if (v[i] > v[i+1]) {
 				int aux = v[i+1];
 				v[i+1] = v[i];
