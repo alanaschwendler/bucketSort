@@ -48,6 +48,10 @@ void printVec(int *v, int size);
 void sort(int *v, int size);
 //void bubble(int *v, int size);
 
+/*
+ * Sorting function for pthreads
+ * @param *params sole argument for starting routine
+ */ 
 void *sort_threads(void *params);
 
 int main() {
@@ -108,7 +112,6 @@ void bucketSort(int *v, int size) {
 	for(i = 0; i < n_thread; ++i) { //sort each bucket
 		if(b[i].num != 0)
 			res = pthread_create(&thr[i], NULL, sort_threads, (void *)args);
-			//sort(b[i].bucket, b[i].num);
 	}
 	
 	idx = 0;
@@ -143,7 +146,9 @@ void sort(int *v, int size) {
 		v[j+1] = tmp;
 	}
 }
-
+/*
+ * Sorting function for pthreads
+ */ 
 void *sort_threads(void *params) {
 	sort(((Args_t *)params)->arr, ((Args_t *)params)->sz);
 }
